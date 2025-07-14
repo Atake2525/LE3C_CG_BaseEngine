@@ -152,7 +152,7 @@ void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std:
 
 }
 
-void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string textureFilePath, const std::string& name)
+void ParticleManager::CreateParticleGroup(ParticleShape particleType, std::string textureFilePath, const std::string& name)
 {
 	if (particleGroups.contains(name))
 	{
@@ -166,13 +166,13 @@ void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string
 
 	switch (particleType)
 	{
-	case ParticleType::plane:
+	case ParticleShape::plane:
 		group.modelData = CreatePlaneModel();
 		break;
-	case ParticleType::Ring:
+	case ParticleShape::Ring:
 		
 		break;
-	case ParticleType::Cylinder:
+	case ParticleShape::Cylinder:
 		group.modelData = CreateCylinderModel();
 		break;
 	default:
@@ -335,15 +335,25 @@ Particle ParticleManager::MakeNewParticle_HitEffect(std::mt19937& randomEngine, 
 	return particle;
 }
 
-void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
-	// 登録済みのパーティクルグループかチェックしてassert
-	//auto it = particleGroups.find(name);
-	//if (it == particleGroups.end())
-	//{
-	//	assert(false);
-	//	// 読み込み済じゃないなら早期return
-	//	return;
-	//}
+Particle ParticleManager::MakeNewParticle_CircleZone(std::mt19937& randomEngine, const Vector3& translate) {
+
+	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+	Particle particle;
+	particle.transform.scale = { 1.0f, 1.0f, 1.0f };
+	particle.transform.rotate = { 0.0f, 0.0f, 0.0f};
+	particle.transform.translate = translate;
+	particle.velocity = { 0.0f, 0.0f, 0.0f };
+	particle.rotateVelocity = { 0.0f, 0.1f, 0.0f };
+	particle.color = { 0.1f, 0.1f, 1.0f, 0.8f };
+
+
+	particle.lifeTime = 100.0f;
+	particle.currentTime = 0;
+
+	return particle;
+}
+
+void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType particleType) {
 	if (!particleGroups.contains(name))
 	{
 		assert(false);
@@ -351,15 +361,27 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 		return;
 	}
 	std::list<Particle> particles;
-	//particles.transform.translate = position;
-	for (uint32_t con = 0; con < count; ++con) {
-		particleGroups[name].particles.push_back(MakeNewParticle(randomEngine, position));
+	switch (particleType)
+	{
+	case ParticleType::Normal:
+		for (uint32_t con = 0; con < count; ++con) {
+			particleGroups[name].particles.push_back(MakeNewParticle(randomEngine, position));
+		}
+		break;
+	case ParticleType::HitEffect:
+		for (uint32_t con = 0; con < count; ++con) {
+			particleGroups[name].particles.push_back(MakeNewParticle_HitEffect(randomEngine, position));
+		}
+		break;
+	case ParticleType::CircleZone:
+		for (uint32_t con = 0; con < count; ++con) {
+			particleGroups[name].particles.push_back(MakeNewParticle_CircleZone(randomEngine, position));
+		}
+		break;
+	default:
+		break;
 	}
-	//it->second.particle.splice(particles.end(), particles);
-	//particleGroups[name].particles.resize(count);
-	//particleGroups[name].particles.insert(particles);
-	//it->second.particles.resize(count);
-	//it->second.particles.splice(particles.end(), particles);
+	//particles.transform.translate = position;
 
 }
 
@@ -396,6 +418,7 @@ void ParticleManager::Update() {
 			(*particleIterator).currentTime += deltaTime;
 			float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
 			(*particleIterator).transform.translate += (*particleIterator).velocity * deltaTime;
+			(*particleIterator).transform.rotate += (*particleIterator).rotateVelocity * deltaTime;
 			//if (particleGroup->second.particleFlag.start) {
 			//	// ...WorldMatrixを求めたり
 			//	//alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
@@ -560,7 +583,7 @@ void ParticleManager::CreateRootSignature() {
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = true;
 	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }

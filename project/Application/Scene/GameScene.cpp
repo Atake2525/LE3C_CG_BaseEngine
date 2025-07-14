@@ -20,7 +20,9 @@ void GameScene::Initialize() {
 
 	ParticleManager::GetInstance()->CreateParticleGroupFromOBJ("Resources/Model/obj", "plane.obj", "plane");
 
-	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
+	ParticleManager::GetInstance()->CreateParticleGroup(ParticleShape::plane, "Resources/Particle/circle2.png", "circle");
+
+	ParticleManager::GetInstance()->CreateParticleGroup(ParticleShape::Cylinder, "Resources/Particle/gradationLine.png", "cylinder");
 
 	//ParticleManager::GetInstance()->CreateParticleGroup("white", "Resources/Model/obj/circle2.png");
 
@@ -230,10 +232,10 @@ void GameScene::Update() {
 	//normHand = normHand * Vector3{ 0.0f, 1.0f, 0.0f };
 
 	if (input->TriggerKey(DIK_Y)) {
-		ParticleManager::GetInstance()->Emit("circle", { 0.0f, 2.0f, 0.0f }, 10);
+		ParticleManager::GetInstance()->Emit("circle", { 0.0f, 2.0f, 0.0f }, 10, ParticleType::Normal);
 	}
 	if (input->TriggerKey(DIK_T)) {
-		ParticleManager::GetInstance()->Emit("plane", { 0.0f, 2.0f, 0.0f }, 10);
+		ParticleManager::GetInstance()->Emit("cylinder", { 0.0f, 2.0f, 0.0f }, 1, ParticleType::CircleZone);
 	}
 
 	/*if (input->TriggerKey(DIK_1))

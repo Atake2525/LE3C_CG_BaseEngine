@@ -20,6 +20,7 @@ class Camera;
 struct Particle {
 	Transform transform;
 	Vector3 velocity;
+	Vector3 rotateVelocity;
 	Vector4 color;
 	float lifeTime;
 	float currentTime;
@@ -84,10 +85,16 @@ struct Emitter {
 	float frequencyTime; //!< 頻度用時刻
 };
 
-enum class ParticleType {
+enum class ParticleShape {
 	plane,
 	Ring,
 	Cylinder,
+};
+
+enum class ParticleType {
+	Normal,
+	HitEffect,
+	CircleZone,
 };
 
 class ParticleManager {
@@ -128,12 +135,12 @@ public:
 	/// <param name="textureFilePath">テクスチャ名</param>
 	void CreateParticleGroupFromOBJ(std::string directoryPath, std::string filename, const std::string& name);
 
-	void CreateParticleGroup(ParticleType particleType, std::string textureFilePath, const std::string& name);
+	void CreateParticleGroup(ParticleShape particleType, std::string textureFilePath, const std::string& name);
 
 	/// <summary>
 	/// パーティクルの発生
 	/// </summary>
-	void Emit(const std::string name, const Vector3& position, uint32_t count);
+	void Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType particleType);
 
 	/// <summary>
 	/// 更新
@@ -246,6 +253,8 @@ private:
 
 	//MaterialData materialData;
 	Particle MakeNewParticle_HitEffect(std::mt19937& randomEngine, const Vector3& translate);
+
+	Particle MakeNewParticle_CircleZone(std::mt19937& randomEngine, const Vector3& translate);
 
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 
