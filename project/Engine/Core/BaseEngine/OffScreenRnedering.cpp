@@ -32,7 +32,11 @@ void OffScreenRnedering::Initialize(DirectXBase* directxBase) {
 	// SRVの生成
 	//directxBase_->GetDevice()->CreateShaderResourceView(renderTextureResource.Get(), &renderTextureSrvDesc, srvCPUHandle);
 
-	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, renderTextureResource, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, 1);
+	DirectX::TexMetadata metadata;
+	metadata.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	metadata.mipLevels = 1;
+
+	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, renderTextureResource, metadata, D3D12_SRV_DIMENSION_TEXTURE2D);
 
 	grayscaleResouce = directxBase_->CreateBufferResource(sizeof(Grayscale));
 	grayscaleResouce->Map(0, nullptr, reinterpret_cast<void**>(&grayscale));

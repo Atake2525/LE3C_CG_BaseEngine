@@ -1,10 +1,17 @@
 #include "FrameWork.h"
 
-void FrameWork::Initialize() {}
+void FrameWork::Initialize() {
+	SceneManager::GetInstance();
+}
 
-void FrameWork::Update() {}
+void FrameWork::Update() {
+	//sceneManager_->Update();
+}
 
-void FrameWork::Finalize() {}
+void FrameWork::Finalize() {
+	//delete sceneManager_;
+	SceneManager::GetInstance()->Finalize();
+}
 
 void FrameWork::Run() {
 	// 初期化

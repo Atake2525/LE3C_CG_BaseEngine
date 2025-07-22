@@ -59,15 +59,43 @@ public: // メンバ関数
 
 	void ResetAnimationSpeed() { animationSpeed = 1.0f; }
 
-	// Parentを登録(子)
-	void SetParent(const Matrix4x4& worldMatrix) { 
-		parent = worldMatrix; 
-		isParent = true;
-	}
+	const float& GetChangeAnimationSpeed() const { return changeAnimationSpeed; }
+	// アニメーションの切り替え時間の設定 Default : 0.4f
+	void SetChangeAnimationSpeed(const float speed = 0.4f) { changeAnimationSpeed = speed; }
 
-	// Parentを破棄
+	// Parentを登録(子)
+	// Setter(Parent)
+	void SetParent(const Matrix4x4& worldMatrix) {
+		parent = worldMatrix;
+		isParent = true;
+		isTranslateParent = false;
+		isRotateParent = false;
+	}
+	// Delete Parent(Parent 解除)
 	void DeleteParent() {
 		isParent = false;
+	}
+	// Setter(Parent)
+	void SetTranslateParent(const Matrix4x4& worldMatrix) {
+		translateParent = worldMatrix;
+		isTranslateParent = true;
+		isParent = false;
+		isRotateParent = false;
+	}
+	// Delete Parent(Parent 解除)
+	void DeleteTranslateParent() {
+		isTranslateParent = false;
+	}
+	// Setter(Parent)
+	void SetRotateParent(const Matrix4x4& worldMatrix) {
+		rotateParent = worldMatrix;
+		isRotateParent = true;
+		isTranslateParent = false;
+		isParent = false;
+	}
+	// Delete Parent(Parent 解除)
+	void DeleteRotateParent() {
+		isRotateParent = false;
 	}
 
 private:
@@ -81,6 +109,10 @@ private:
 
 	Matrix4x4 parent;
 	bool isParent = false;
+	Matrix4x4 translateParent;
+	bool isTranslateParent = false;
+	Matrix4x4 rotateParent;
+	bool isRotateParent = false;
 
 	Camera* camera = nullptr;
 
@@ -88,12 +120,6 @@ private:
 
 	struct CameraForGPU {
 		Vector3 worldPosition;
-	};
-
-	struct TransformationMatrix {
-		Matrix4x4 WVP;
-		Matrix4x4 World;
-		Matrix4x4 WorldInverseTranspose;
 	};
 
 	// 座標変換リソースのバッファリソース
@@ -115,6 +141,7 @@ private:
 
 	float animationTime = 0.0f;
 	float changeAnimationTime = 0.0f;
+	float changeAnimationSpeed = 0.4f;
 
 	bool startAnimation = false;
 	float animationSpeed = 1.0f;

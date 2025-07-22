@@ -18,9 +18,10 @@ public:
 
 	// Getter
 	const Matrix4x4 GetWorldMatrix() const { 
-		Matrix4x4 world = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-		return world; 
+		return worldMatrix;
 	}
+
+	const Vector3 GetWorldPosition() const;
 	// Getter
 	const Matrix4x4& GetViewMatrix() const { return viewMatrix; }
 	// Getter

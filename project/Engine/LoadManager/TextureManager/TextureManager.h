@@ -68,6 +68,7 @@ private:
 		uint32_t srvIndex;
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU; // SRV作成時に必要なCPUハンドル
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU; // 描画コマンドに必要なGPUハンドル
+		Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
 	};
 	// テクスチャデータ
 	std::unordered_map<std::string, TextureData> textureDatas;

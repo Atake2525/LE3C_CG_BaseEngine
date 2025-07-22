@@ -1,4 +1,7 @@
+#include "SceneManager.h"
+
 #pragma once
+
 class FrameWork {
 public:
 	// 初期化
@@ -23,4 +26,6 @@ public:
 
 private:
 	bool roopOut_ = false;
+
+	//SceneManager* sceneManager_ = nullptr;
 };

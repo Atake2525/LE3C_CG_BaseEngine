@@ -75,3 +75,12 @@ void Camera::Update() {
 	// ここがエラーの可能性あり
 	viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 }
+
+const Vector3 Camera::GetWorldPosition() const
+{
+	Vector3 result;
+	result.x = worldMatrix.m[3][0];
+	result.y = worldMatrix.m[3][1];
+	result.z = worldMatrix.m[3][2];
+	return result;
+}

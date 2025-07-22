@@ -1,4 +1,5 @@
 #include "FrameWork.h"
+#include "BaseScene.h"
 #include "D3DResourceLeakChecker.h"
 #include "WinApp.h"
 #include "DirectXBase.h"
@@ -15,6 +16,7 @@
 #include "ImGuiManager.h"
 #include "SkinningObject3dBase.h"
 #include "ParticleManager.h"
+#include "SkyBox.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"
@@ -58,6 +60,8 @@ private:
 
 	bool finished = false;
 
-	GameScene* gameScene = nullptr;
+	//BaseScene* gameScene = nullptr;
+	// 
+	//SceneManager* sceneManager_ = nullptr;
 
 };

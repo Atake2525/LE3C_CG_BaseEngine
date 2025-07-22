@@ -7,6 +7,7 @@
 
 using namespace Logger;
 using namespace StringUtility;
+using namespace Microsoft::WRL;
 
 TextureManager* TextureManager::instance = nullptr;
 
@@ -62,24 +63,52 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	//assert(textureDatas.size() + kSRVIndexTop < SrvManager::GetInstance()->kMaxSRVCount);
 	assert(SrvManager::GetInstance()->CheckAllocate());
 
+
 	// テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = ConvertString(filePath);
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+	HRESULT hr;
+	// .ddsかそうでないかを判定する
+	if (filePathW.ends_with(L".dds")) // .ddsで終わって居tらddsとみなす。より安全な方法はいくらでもあるので余裕があれば対応させる
+	{
+		hr = DirectX::LoadFromDDSFile(filePathW.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, image);
+	}
+	else
+	{
+		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+	}
+	//HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr));
 
-	// テクスチャデータを追加
-	//textureDatas.resize(textureDatas.size() + 1);
+	// DirectXTexでは直接的に圧縮フォーマットのMipMap生成に対応していないので、圧縮されていたらそのままimageを使うように変更する。リンク先にあるようにDecompress/Compressで対応しても良い
+	DirectX::ScratchImage mipImages{};
 
 	// 追加したテクスチャデータの差印象を取得する
 	TextureData& textureData = textureDatas[path];
 
-	// テクスチャデータをtextureDatasの末尾に追加する
-	textureData.filePath = filePath;
-	textureData.metadata = image.GetMetadata();
-	textureData.resource = directxBase_->CreateTextureResource(textureData.metadata);
+	if (DirectX::IsCompressed(image.GetMetadata().format)) // 圧縮フォーマットかどうかを調べる
+	{
+		mipImages = std::move(image); // 圧縮フォーマットならそのまま使うのでmoveする
+		// テクスチャデータをtextureDatasの末尾に追加する
+		textureData.filePath = filePath;
+		textureData.metadata = mipImages.GetMetadata();
+		textureData.resource = directxBase_->CreateTextureResource(textureData.metadata);
 
-	directxBase_->UploadTextureData(textureData.resource, image);
+		textureData.intermediateResource = directxBase_->UploadTextureData(textureData.resource, mipImages);
+	}
+	else
+	{
+		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 4, mipImages);
+		// テクスチャデータをtextureDatasの末尾に追加する
+		textureData.filePath = filePath;
+		textureData.metadata = image.GetMetadata();
+		textureData.resource = directxBase_->CreateTextureResource(textureData.metadata);
+
+		textureData.intermediateResource = directxBase_->UploadTextureData(textureData.resource, image);
+	}
+
+	// テクスチャデータを追加
+	//textureDatas.resize(textureDatas.size() + 1);
 
 		// テクスチャデータの要素番号をSRVのインデックスとする
 	//uint32_t srvIndex = static_cast<uint32_t>(textureDatas.size() - 1) + kSRVIndexTop;
@@ -98,7 +127,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
 	//srvDesc.Texture2D.MipLevels = UINT(textureData.metadata.mipLevels);
 
-	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, textureData.resource, textureData.metadata.format, UINT(textureData.metadata.mipLevels));
+	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, textureData.resource, textureData.metadata);
 
 	// 設定をもとにSRVの生成
 	//directxBase_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
@@ -188,7 +217,7 @@ uint32_t TextureManager::GetSrvIndex(const std::string& filePath)
 	// 範囲外指定チェック
 	if (!textureDatas.contains(path))
 	{
-		LogW("指定のtextureは見つかりませんでした");
+		Log("指定のtextureは見つかりませんでした");
 		TextureData& textureData = textureDatas["white1x1"];
 		return textureData.srvIndex;
 	}

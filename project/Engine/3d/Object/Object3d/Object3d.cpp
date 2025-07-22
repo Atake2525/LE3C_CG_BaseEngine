@@ -96,7 +96,7 @@ void Object3d::Update() {
 		}
 		if (changingAnimation && startAnimation)
 		{
-			ChangeAnimation(animation[beforAnimationKey], animation[animationKey], animationTime, 0.4f);
+			ChangeAnimation(animation[beforAnimationKey], animation[animationKey], animationTime, changeAnimationSpeed);
 		}
 		UpdateSkelton(skeleton);
 		UpdateSkinCluster(skinCluster, skeleton);
@@ -105,6 +105,26 @@ void Object3d::Update() {
 	if (isParent)
 	{
 		worldMatrix = Multiply(worldMatrix, parent);
+	}
+	else if (isTranslateParent)
+	{
+		Matrix4x4 translate = Multiply(worldMatrix, translateParent);
+		worldMatrix.m[3][0] = translate.m[3][0];
+		worldMatrix.m[3][1] = translate.m[3][1];
+		worldMatrix.m[3][2] = translate.m[3][2];
+	}
+	else if (isRotateParent)
+	{
+		Matrix4x4 rotate = Multiply(worldMatrix, rotateParent);
+		worldMatrix.m[0][0] = rotate.m[0][0];
+		worldMatrix.m[0][1] = rotate.m[0][1];
+		worldMatrix.m[0][2] = rotate.m[0][2];
+		worldMatrix.m[1][0] = rotate.m[1][0];
+		worldMatrix.m[1][1] = rotate.m[1][1];
+		worldMatrix.m[1][2] = rotate.m[1][2];
+		worldMatrix.m[2][0] = rotate.m[2][0];
+		worldMatrix.m[2][1] = rotate.m[2][1];
+		worldMatrix.m[2][2] = rotate.m[2][2];
 	}
 
 	Matrix4x4 worldViewProjectionMatrix;
@@ -238,12 +258,12 @@ void Object3d::ChangePlayAnimation(const std::string key)
 		animationKey = key;
 		changingAnimation = true;
 		changeAnimationTime = 0.0f;
-		LogW("再生されるアニメーションが変更されました\n");
+		//Log("再生されるアニメーションが変更されました\n");
 	}
 	else
 	{
 		Log("this key is not loaded now\n");
-		LogW("指定のキーのアニメーションは追加されていません\n");
+		Log("指定のキーのアニメーションは追加されていません\n");
 	}
 
 }
@@ -253,11 +273,12 @@ void Object3d::AddAnimation(std::string directoryPath, std::string filename, std
 	{
 		model_->AddAnimation(directoryPath, filename, animationName);
 		animation = model_->GetAnimation();
+		Log("アニメーションの読み込み完了\n");
 	}
 	else
 	{
 		Log("this object is not enable animation\n");
-		LogW("このオブジェクトはアニメーションが有効化されていません\n");
+		Log("このオブジェクトはアニメーションが有効化されていません\n");
 	}
 }
 
@@ -266,11 +287,11 @@ void Object3d::PlayDefaultAnimation() {
 	animationKey = "DefaultAnimation"; 
 	changingAnimation = false;
 	Log("initialized animation");
-	LogW("アニメーションを初期化しました\n");
+	Log("アニメーションを初期化しました\n");
 	if (!model_->IsAnimation())
 	{
 		Log("this object is not enable animation");
-		LogW("このオブジェクトはアニメーションが有効化されていません\n");
+		Log("このオブジェクトはアニメーションが有効化されていません\n");
 	}
 }
 
@@ -443,12 +464,12 @@ const Vector3 Object3d::GetJointPosition(const std::string jointName)
 		}
 		if (hitSize == nameSize)
 		{
-			LogW("目標が見つかりました\n");
+			//Log("目標が見つかりました\n");
 			Matrix4x4 jointMatrix = Multiply(joint.skeletonSpaceMatrix, worldMatrix);
 			return { jointMatrix.m[3][0], jointMatrix.m[3][1], jointMatrix.m[3][2] };
 		}
 	}
-	LogW("目標が見つかりませんでした\n");
+	Log("目標が見つかりませんでした\n");
 	return { 0.0f, 0.0f, 0.0f };
 }
 
@@ -476,12 +497,12 @@ const Vector3 Object3d::GetJointNormal(const std::string jointName)
 		}
 		if (hitSize == nameSize)
 		{
-			LogW("目標が見つかりました\n");
+			Log("目標が見つかりました\n");
 			Matrix4x4 jointMatrix = Multiply(joint.skeletonSpaceMatrix, worldMatrix);
 			return { jointMatrix.m[0][2], jointMatrix.m[1][2], jointMatrix.m[2][2] };
 		}
 	}
-	LogW("目標が見つかりませんでした\n");
+	Log("目標が見つかりませんでした\n");
 	return { 0.0f, 0.0f, 0.0f };
 }
 

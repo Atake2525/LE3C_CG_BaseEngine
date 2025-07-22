@@ -25,6 +25,8 @@ void MyGame::Initialize() {
 
 	WireFrameObjectBase::GetInstance()->Initialize(directxBase);
 
+	SkyBox::GetInstance()->Initialize(directxBase);
+
 	ModelBase::GetInstance()->Initialize(directxBase);
 
 	TextureManager::GetInstance()->Initialize(directxBase);
@@ -41,9 +43,11 @@ void MyGame::Initialize() {
 
 	//// ↓---- シーンの初期化 ----↓ ////
 
-	gameScene = new GameScene();
+	SceneManager::GetInstance();
+	
+	SceneManager::GetInstance()->SetNextScene("GAMESCENE");
 
-	gameScene->Initialize();
+	//gameScene->Initialize();
 
 	//// ↑---- シーンの初期化 ----↑ ////
 }
@@ -61,10 +65,10 @@ void MyGame::Update() {
 
 	directxBase->Update();
 	Light::GetInstance()->Update();
-	//ParticleManager::GetInstance()->Update();
-	gameScene->Update();
+	SceneManager::GetInstance()->Update();
+	ParticleManager::GetInstance()->Update();
 
-	if (gameScene->isFinished())
+	if (SceneManager::GetInstance()->EndRequest())
 	{
 		finished = true;
 	}
@@ -77,7 +81,9 @@ void MyGame::Draw() {
 
 	directxBase->PreDrawRenderTexture();
 
-	gameScene->Draw();
+	//gameScene->Draw();
+	SceneManager::GetInstance()->Draw();
+	SkyBox::GetInstance()->Draw();
 
 	directxBase->PostDrawRenderTexture();
 
@@ -110,6 +116,8 @@ void MyGame::Finalize() {
 
 	WireFrameObjectBase::GetInstance()->Finalize();
 
+	SkyBox::GetInstance()->Finalize();
+
 	ModelBase::GetInstance()->Finalize();
 
 	TextureManager::GetInstance()->Finalize();
@@ -126,8 +134,7 @@ void MyGame::Finalize() {
 
 	//// ↓---- シーンの解放 ----↓ ////
 
-	gameScene->Finalize();
-	delete gameScene;
+	//SceneManager::GetInstance()->Finalize();
 
 	//// ↑---- シーンの解放 ----↑ ////
 

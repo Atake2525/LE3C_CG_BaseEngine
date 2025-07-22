@@ -1,3 +1,4 @@
+#include "BaseScene.h"
 #include "Object3d.h"
 #include "Object3dBase.h"
 #include "SpriteBase.h"
@@ -11,17 +12,19 @@
 #include "AABB.h"
 #include "ParticleManager.h"
 #include "Audio.h"
-
+#include "SceneManager.h"
+//#include "Player.h"
+#include "SkyBox.h"
 
 #pragma once
 
-class GameScene
+class GameScene : public BaseScene
 {
 public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize() override;
 
 	/// <summary>
 	/// 終了処理
@@ -31,21 +34,17 @@ public:
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update();
+	void Update() override;
 
 	/// <summary>
 	/// 描画
 	/// </summary>
-	void Draw();
+	void Draw() override;
 
-	const bool& isFinished() const { return finished; }
+	const bool& EndRequest() override { return finished; }
 
 private:
 	float speed = 0.25f;
-
-	Object3d* object3d = nullptr;
-
-	Object3d* human = nullptr;
 
 	bool sneak = false;
 
@@ -55,7 +54,7 @@ private:
 
 	Object3d* terrain = nullptr;
 
-	Sprite* sprite = nullptr;
+	Object3d* box = nullptr;
 
 	Camera* camera = nullptr;
 	Object3d* cameraObject = nullptr;
@@ -76,5 +75,7 @@ private:
 
 	Vector2 leftTop;
 	Transform transformSprite;
+
+	//Player* player_ = nullptr;
 };
 

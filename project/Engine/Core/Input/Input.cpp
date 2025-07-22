@@ -55,7 +55,7 @@ void Input::CreateKeyboardDevice() {
 	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
 	if (FAILED(result))
 	{
-		LogW("キーボードの接続に失敗\n");
+		Log("キーボードの接続に失敗\n");
 	}
 	else
 	{
@@ -68,7 +68,7 @@ void Input::CreateKeyboardDevice() {
 	// 排他制御レベルセット
 	result = keyboard->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
-	LogW("キーボードの接続に成功\n");
+	Log("キーボードの接続に成功\n");
 }
 
 void Input::CreateMouseDevice() {
@@ -78,7 +78,7 @@ void Input::CreateMouseDevice() {
 	result = directInputMouse->CreateDevice(GUID_SysMouse, &mouse, NULL);
 	if (FAILED(result))
 	{
-		LogW("マウスの接続に失敗\n");
+		Log("マウスの接続に失敗\n");
 	}
 	else
 	{
@@ -92,7 +92,7 @@ void Input::CreateMouseDevice() {
 	assert(SUCCEEDED(result));
 	if (success)
 	{
-		LogW("マウスの接続に成功\n");
+		Log("マウスの接続に成功\n");
 	}
 }
 
@@ -105,12 +105,12 @@ void Input::CreateControllerDevice() {
 	if (FAILED(result))
 	{
 		isControllerConnected = false;
-		LogW("コントローラーの接続に失敗\n");
+		Log("コントローラーの接続に失敗\n");
 	}
 	else
 	{
 		isControllerConnected = true;
-		LogW("コントローラーの接続に成功\n");
+		Log("コントローラーの接続に成功\n");
 	}
 	if (isControllerConnected)
 	{

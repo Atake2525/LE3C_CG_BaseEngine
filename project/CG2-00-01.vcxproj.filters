@@ -28,7 +28,7 @@
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp" />
     <ClCompile Include="Application\FrameWork\FrameWork.cpp" />
     <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp" />
-    <ClCompile Include="Application\Scene\GameScene.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\GameScene.cpp" />
     <ClCompile Include="Application\Scene\MyGame.cpp" />
     <ClCompile Include="Engine\Lighting\Light.cpp" />
     <ClCompile Include="Engine\UI\UI.cpp" />
@@ -38,6 +38,13 @@
     <ClCompile Include="Engine\BlackBox\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
     <ClCompile Include="Engine\LoadManager\ParticleManager\ParticleManager.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp" />
+    <ClCompile Include="Application\Scene\Manager\BaseScene.cpp" />
+    <ClCompile Include="Application\Scene\Manager\SceneManager.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp" />
+    <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
+    <ClCompile Include="Engine\Game\Player.cpp" />
+    <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Audio\Audio.h" />
@@ -74,7 +81,7 @@
     <ClInclude Include="Application\FrameWork\FrameWork.h" />
     <ClInclude Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
-    <ClInclude Include="Application\Scene\GameScene.h" />
+    <ClInclude Include="Application\Scene\PlayScene\GameScene.h" />
     <ClInclude Include="Application\Scene\MyGame.h" />
     <ClInclude Include="Engine\Lighting\Light.h" />
     <ClInclude Include="Engine\UI\UI.h" />
@@ -86,6 +93,14 @@
     <ClInclude Include="Engine\BlackBox\ImGui\ImGuiManager.h" />
     <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />
     <ClInclude Include="Engine\LoadManager\ParticleManager\ParticleManager.h" />
+    <ClInclude Include="Application\Scene\PlayScene\DemoScene.h" />
+    <ClInclude Include="Application\Scene\Manager\BaseScene.h" />
+    <ClInclude Include="Application\Scene\Manager\SceneManager.h" />
+    <ClInclude Include="Application\Scene\PlayScene\TitleScene.h" />
+    <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
+    <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
+    <ClInclude Include="Engine\Game\Player.h" />
+    <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib" />
@@ -105,10 +120,13 @@
     <FxCompile Include="Resources\shaders\Vignetting.PS.hlsl" />
     <FxCompile Include="Resources\shaders\GaussianFilter.PS.hlsl" />
     <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Skybox.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Skybox.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\Fullscreen.hlsli" />
     <None Include="Resources\shaders\Object3d.hlsli" />
     <None Include="Resources\shaders\Particle.hlsli" />
+    <None Include="Resources\shaders\Skybox.hlsli" />
   </ItemGroup>
 </Project>

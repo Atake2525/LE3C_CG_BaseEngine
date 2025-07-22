@@ -152,7 +152,7 @@ void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std:
 
 }
 
-void ParticleManager::CreateParticleGroup(ParticleShape particleType, std::string textureFilePath, const std::string& name)
+void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string textureFilePath, const std::string& name)
 {
 	if (particleGroups.contains(name))
 	{
@@ -166,14 +166,14 @@ void ParticleManager::CreateParticleGroup(ParticleShape particleType, std::strin
 
 	switch (particleType)
 	{
-	case ParticleShape::plane:
+	case ParticleType::plane:
 		group.modelData = CreatePlaneModel();
 		break;
-	case ParticleShape::Ring:
-		
+	case ParticleType::Ring:
+
 		break;
-	case ParticleShape::Cylinder:
-		group.modelData = CreateCylinderModel();
+	case ParticleType::Cylinder:
+
 		break;
 	default:
 		break;
@@ -335,25 +335,15 @@ Particle ParticleManager::MakeNewParticle_HitEffect(std::mt19937& randomEngine, 
 	return particle;
 }
 
-Particle ParticleManager::MakeNewParticle_CircleZone(std::mt19937& randomEngine, const Vector3& translate) {
-
-	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
-	Particle particle;
-	particle.transform.scale = { 1.0f, 1.0f, 1.0f };
-	particle.transform.rotate = { 0.0f, 0.0f, 0.0f};
-	particle.transform.translate = translate;
-	particle.velocity = { 0.0f, 0.0f, 0.0f };
-	particle.rotateVelocity = { 0.0f, 0.1f, 0.0f };
-	particle.color = { 0.1f, 0.1f, 1.0f, 0.8f };
-
-
-	particle.lifeTime = 100.0f;
-	particle.currentTime = 0;
-
-	return particle;
-}
-
-void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType particleType) {
+void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
+	// 登録済みのパーティクルグループかチェックしてassert
+	//auto it = particleGroups.find(name);
+	//if (it == particleGroups.end())
+	//{
+	//	assert(false);
+	//	// 読み込み済じゃないなら早期return
+	//	return;
+	//}
 	if (!particleGroups.contains(name))
 	{
 		assert(false);
@@ -361,27 +351,15 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 		return;
 	}
 	std::list<Particle> particles;
-	switch (particleType)
-	{
-	case ParticleType::Normal:
-		for (uint32_t con = 0; con < count; ++con) {
-			particleGroups[name].particles.push_back(MakeNewParticle(randomEngine, position));
-		}
-		break;
-	case ParticleType::HitEffect:
-		for (uint32_t con = 0; con < count; ++con) {
-			particleGroups[name].particles.push_back(MakeNewParticle_HitEffect(randomEngine, position));
-		}
-		break;
-	case ParticleType::CircleZone:
-		for (uint32_t con = 0; con < count; ++con) {
-			particleGroups[name].particles.push_back(MakeNewParticle_CircleZone(randomEngine, position));
-		}
-		break;
-	default:
-		break;
-	}
 	//particles.transform.translate = position;
+	for (uint32_t con = 0; con < count; ++con) {
+		particleGroups[name].particles.push_back(MakeNewParticle(randomEngine, position));
+	}
+	//it->second.particle.splice(particles.end(), particles);
+	//particleGroups[name].particles.resize(count);
+	//particleGroups[name].particles.insert(particles);
+	//it->second.particles.resize(count);
+	//it->second.particles.splice(particles.end(), particles);
 
 }
 
@@ -418,7 +396,6 @@ void ParticleManager::Update() {
 			(*particleIterator).currentTime += deltaTime;
 			float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
 			(*particleIterator).transform.translate += (*particleIterator).velocity * deltaTime;
-			(*particleIterator).transform.rotate += (*particleIterator).rotateVelocity * deltaTime;
 			//if (particleGroup->second.particleFlag.start) {
 			//	// ...WorldMatrixを求めたり
 			//	//alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
@@ -583,7 +560,7 @@ void ParticleManager::CreateRootSignature() {
 	// Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = true;
 	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	// 比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
@@ -792,6 +769,29 @@ ModelData ParticleManager::LoadModelFile(const std::string& directoryPath, const
 	return modelData;
 }
 
+//void ParticleManager::CreateVertexResource() {
+//	// 頂点リソースの作成
+//	vertexResource = directxBase_->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
+//}
+
+//void ParticleManager::CreateVertexxBufferView() {
+//	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+//	// 使用するリソースのサイズは頂点6つ分のサイズ
+//	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+//	// 1頂点あたりのサイズ
+//	vertexBufferView.StrideInBytes = sizeof(VertexData);
+//}
+//
+//void ParticleManager::MappingVertexData() {
+//	// VertexResourceにデータを書き込むためのアドレスを取得してvertexDataに割り当てる
+//	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+//	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+//}
+//
+//void ParticleManager::CreateMaterialResource() {
+//	materialResource = directxBase_->CreateBufferResource(sizeof(Material));
+//}
+
 bool ParticleManager::IsCollision(const AABB& aabb, const Vector3& point) {
 	if ((aabb.min.x <= point.x && aabb.max.x >= point.x) &&
 		(aabb.min.y <= point.y && aabb.max.y >= point.y) &&
@@ -799,46 +799,4 @@ bool ParticleManager::IsCollision(const AABB& aabb, const Vector3& point) {
 		return true;
 	}
 	return false;
-}
-
-ModelData ParticleManager::CreateCylinderModel() {
-	const uint32_t cylinderDivide = 16;
-	const float topRadius = 1.0f;
-	const float bottomRadius = 1.0f;
-	const float height = 1.0f;
-	float radianPerDivide = 2.0f * std::numbers::pi_v<float> / float(cylinderDivide);
-
-	ModelData model;
-	model.matVertexData.resize(1);
-
-	for (uint32_t index = 0; index < cylinderDivide; ++index) {
-		float sin = std::sin(index * radianPerDivide);
-		float cos = std::cos(index * radianPerDivide);
-		float sinNext = std::sin((index + 1) * radianPerDivide);
-		float cosNext = std::cos((index + 1) * radianPerDivide);
-		float u = float(index) / float(cylinderDivide);
-		float uNext = float(index + 1) / float(cylinderDivide);
-
-		VertexData vertexData;
-		vertexData = { { -sin * topRadius, height, cos * topRadius, 1.0f }, { u, 0.0f }, { -sin, 0.0f, cos } };
-		model.vertices.push_back(vertexData);
-		model.matVertexData[0].vertices.push_back(vertexData);
-		vertexData = { {-sinNext * topRadius, height, cosNext * topRadius, 1.0f}, {uNext, 0.0f}, {-sinNext, 0.0f, cosNext} };
-		model.vertices.push_back(vertexData);
-		model.matVertexData[0].vertices.push_back(vertexData);
-		vertexData = { {-sin * bottomRadius, 0.0f, cos * bottomRadius, 1.0f}, {u, 1.0f}, {-sin, 0.0f, cos} };
-		model.vertices.push_back(vertexData);
-		model.matVertexData[0].vertices.push_back(vertexData);
-		vertexData = { {-sin * bottomRadius, 0.0f, cos * bottomRadius, 1.0f}, {u, 1.0f}, {-sin, 0.0f, cos} };
-		model.vertices.push_back(vertexData);
-		model.matVertexData[0].vertices.push_back(vertexData);
-		vertexData = { {-sinNext * topRadius, height, cosNext * topRadius, 1.0f}, {uNext, 0.0f}, {-sinNext, 0.0f, cosNext} };
-		model.vertices.push_back(vertexData);
-		model.matVertexData[0].vertices.push_back(vertexData);
-		vertexData = { {-sinNext * bottomRadius, 0.0f, cosNext * bottomRadius, 1.0f}, {uNext, 1.0f}, {-sinNext, 0.0f, cosNext} };
-		model.vertices.push_back(vertexData);
-		model.matVertexData[0].vertices.push_back(vertexData);
-
-	}
-	return model;
 }

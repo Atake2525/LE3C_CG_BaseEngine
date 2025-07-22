@@ -79,6 +79,7 @@ public:
 	const std::map<std::string, Animation>& GetAnimation() const { return animation; }
 	const Animation& GetDefaultAnimation() const { return animation.at("DefaultAnimation"); }
 	const bool& IsAnimation() const { return isAnimation; }
+
 	// Getter(ModelData vertices)
 	const std::vector<VertexData>& GetVertices() const { return modelData.vertices; }
 

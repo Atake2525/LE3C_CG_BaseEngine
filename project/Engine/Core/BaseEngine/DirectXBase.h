@@ -10,6 +10,7 @@
 #include <chrono>
 #include <thread>
 #include "externels/DirectXTex/DirectXTex.h"
+#include "externels/DirectXTex/d3dx12.h"
 #include "Vector4.h"
 #include "Vector3.h"
 #include "OffScreenRnedering.h"
@@ -73,7 +74,8 @@ public:
 	// RenderTextureの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height, DXGI_FORMAT format, const Vector4& clearColor);
 
-	void UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
+	[[nodiscard]]
+	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
 private:
 

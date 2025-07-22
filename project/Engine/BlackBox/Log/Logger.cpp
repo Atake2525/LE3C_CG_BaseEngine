@@ -5,8 +5,8 @@
 using namespace StringUtility;
 
 namespace Logger {
-void Log(const std::string& message) { OutputDebugStringA(message.c_str()); }
-void Log(const std::wstring& message) { OutputDebugStringA(ConvertString(message).c_str()); }
-void LogW(const std::string& message) { OutputDebugStringW(ConvertString(message).c_str()); }
-void LogW(const std::wstring& message) { OutputDebugStringW(message.c_str()); }
+//void Log(const std::string& message) { OutputDebugStringA(message.c_str()); }
+//void Log(const std::wstring& message) { OutputDebugStringA(ConvertString(message).c_str()); }
+void Log(const std::string& message) { OutputDebugStringW(ConvertString(message).c_str()); }
+void Log(const std::wstring& message) { OutputDebugStringW(message.c_str()); }
 } // namespace Logger

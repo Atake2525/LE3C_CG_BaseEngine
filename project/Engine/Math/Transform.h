@@ -1,6 +1,7 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Quaternion.h"
+#include "Matrix4x4.h"
 
 #pragma once
 struct Transform {
@@ -16,4 +17,8 @@ struct QuaternionTransform
 	Vector3 translate;
 };
 
-//class Transform {};
+struct TransformationMatrix {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+	Matrix4x4 WorldInverseTranspose;
+};

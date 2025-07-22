@@ -378,7 +378,7 @@ Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 	return ans;
 };
 
-//３次元アフィン変換行列
+// 3次元アフィン変換行列
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
 	Matrix4x4 R = { 0 };
 	Matrix4x4 ans = { 0 };
@@ -426,6 +426,14 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const
 	ans.m[3][2] = translate.z;
 
 	return ans;
+}
+Matrix4x4 MakeAffineMatrix(Transform transform)
+{
+	return MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+}
+Matrix4x4 MakeAffineMatrix(QuaternionTransform quaternionTransform)
+{
+	return MakeAffineMatrix(quaternionTransform.scale, quaternionTransform.rotate, quaternionTransform.translate);
 }
 ;
 
@@ -814,6 +822,12 @@ Vector3 Lerp(const Vector3& befor, const Vector3& after, float t) {
 	ans.x = t * after.x + (1.0f - t) * befor.x;
 	ans.y = t * after.y + (1.0f - t) * befor.y;
 	ans.z = t * after.z + (1.0f - t) * befor.z;
+	return ans;
+}
+
+float Lerp(const float& befor, const float& after, float t) {
+	float ans = 0.0f;
+	ans = t * after + (1.0f - t) * befor;
 	return ans;
 }
 

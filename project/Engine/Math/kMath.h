@@ -11,6 +11,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <numbers>
+#include "Transform.h"
 
 const Vector3 operator*(const Vector3& v, const float f);
 
@@ -75,6 +76,12 @@ Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate);
+
+Matrix4x4 MakeAffineMatrix(Transform transform);
+
+Matrix4x4 MakeAffineMatrix(QuaternionTransform quaternionTransform);
+
+
 
 //3次元アフィン変換行列Quaternion版
 Matrix4x4 MakeAffineMatrixInQuaternion(const Vector3& scale, const Matrix4x4& axisAngle, const Vector3& translate);
@@ -168,6 +175,8 @@ Vector3 easeInBack(float t, Vector3 x1, Vector3 x2);
 Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t);
 
 Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
+
+float Lerp(const float& v1, const float& v2, float t);
 
 float Dot(const Quaternion& v1, const Quaternion& v2);
 
