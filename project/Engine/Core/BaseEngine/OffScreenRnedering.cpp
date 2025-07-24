@@ -83,11 +83,11 @@ void OffScreenRnedering::Update() {
 		ImGui::SliderInt("size", &boxFilter->size, 1, 25);
 		ImGui::TreePop();
 	}
-	if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
+	/*if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
 		ImGui::Checkbox("有効化", &gaussianFilter->enableGaussianFilter);
 		ImGui::SliderFloat("size", &gaussianFilter->sigma, 1.0f, 10.0f);
 		ImGui::TreePop();
-	}
+	}*/
 	ImGui::End();
 #endif _DEBUG
 
