@@ -5,7 +5,7 @@ struct GaussianFilter
     bool enableGaussianFilter;
     float sigma;
 };
-ConstantBuffer<GaussianFilter> gGaussianFilter : register(b3);
+ConstantBuffer<GaussianFilter> gGaussianFilter : register(b4);
 
 float Gauss(float x, float y, float sigma)
 {
@@ -35,7 +35,7 @@ float f(float a[3][3], float kernel[3][3], float x, float y)
     return sum;
 }
 
-PixelShaderOutput main(VertexShaderOutput input)
+PixelShaderOutput ShadingGaussianFilter(VertexShaderOutput input)
 {
     PixelShaderOutput output;
     output = ShadingBoxFilter(input);

@@ -6,7 +6,7 @@ struct Vignette
     float intensity; //!< ‹P“x
     float scale;
 };
-ConstantBuffer<Vignette> gVigentte : register(b1);
+ConstantBuffer<Vignette> gVigentte : register(b2);
 
 PixelShaderOutput ShadingVignetting(VertexShaderOutput input)
 {

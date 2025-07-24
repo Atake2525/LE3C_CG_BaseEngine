@@ -51,11 +51,12 @@ public:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource;
 
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetDepthStencilResource() const { return depthStencilResource; }
+
 	// getter
 	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() const { return device.Get(); }
+
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
-	// SwapChainからResourceを引っ張ってくる
-	//Microsoft::WRL::ComPtr<ID3D12Resource> GetSwapChainResources(UINT i) const { return swapChainResources[i].Get(); };
 
 	/// <summary>
 	/// ディスクリプターヒープの作成関数
@@ -136,10 +137,6 @@ private:
 	/// </summary>
 	void CreateDXCCompiler();
 	/// <summary>
-	/// ImGuiの初期化
-	/// </summary>
-	void InitializeImgui();
-	/// <summary>
 	/// 指定番号のCPUデスクリプタハンドルを取得する
 	/// </summary>
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
@@ -168,19 +165,8 @@ private:
 	// 深度バッファ
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	// レンダーターゲットビュー
-	// スワップチェイン
-	// SwapChainからResourceを引っ張ってくる
-	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvTextureHandle;
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource> renderTextureResource;
-
-	//const Vector4 renderTargetClearValue{ 1.0f, 0.0f, 0.0f, 1.0f }; // 分かりやすい赤にする
-
-	/*D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle;*/
-
 
 	//// フェンス
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
@@ -203,24 +189,14 @@ private:
 	UINT backBufferIndex;
 	// リソースバリア
 	D3D12_RESOURCE_BARRIER barrier{};
-	// dsvHandle
-	//D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
-	//
-
-
+	
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 
 	// RTV様のヒープでディスクリプタの数は2。RTVはShader内で触るものではないので、ShaderVisibleはfalse
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap = nullptr;
 
-	//// SRV様のヒープでディスクリプタの数は128。SRVはShader内で触るものなので、shaderVisibleはtrue
-	//Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap = nullptr;
-
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはFalse
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap = nullptr;
-
-	// offScreenRendering用の3角形の変数宣言
-	void CreatePSO();
 
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 
@@ -263,14 +239,4 @@ private:
 	OffScreenRnedering* offscreen = nullptr;
 
 	float clearColor[4];
-
-	//struct Monotone
-	//{
-	//	float x, y, z;
-	//};
-
-	////Monotone monotone = { 107.0f, 74.0f, 43.0f };
-	//Monotone monotone;
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource> monotoneResouce;
 };

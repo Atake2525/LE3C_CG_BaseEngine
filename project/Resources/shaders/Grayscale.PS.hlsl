@@ -3,6 +3,15 @@
 Texture2D<float4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
 
+Texture2D<float> gDepthTexture : register(t1);
+SamplerState gSamplerPoint : register(s1);
+
+struct Material
+{
+    float4x4 projectionInverse;
+};
+ConstantBuffer<Material> gMaterial : register(b0);
+
 struct PixelShaderOutput
 {
     float4 color : SV_TARGET0;
@@ -14,7 +23,7 @@ struct Grayscale
     float3 toneColor;
     float alpha;
 };
-ConstantBuffer<Grayscale> gGrayscale : register(b0);
+ConstantBuffer<Grayscale> gGrayscale : register(b1);
 
 PixelShaderOutput ShadingGrayscale(VertexShaderOutput input)
 {

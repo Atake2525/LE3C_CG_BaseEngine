@@ -7,7 +7,7 @@ struct BoxFilter
     bool enableBoxFilter;
     int size;
 };
-ConstantBuffer<BoxFilter> gBoxFilter : register(b2);
+ConstantBuffer<BoxFilter> gBoxFilter : register(b3);
 
 PixelShaderOutput ShadingBoxFilter(VertexShaderOutput input)
 {

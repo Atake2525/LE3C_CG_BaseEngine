@@ -55,6 +55,21 @@ void OffScreenRnedering::Initialize(DirectXBase* directxBase) {
 	gaussianFilterResource->Map(0, nullptr, reinterpret_cast<void**>(&gaussianFilter));
 	gaussianFilter->enableGaussianFilter = false;
 	gaussianFilter->sigma = 2.0f;
+
+	outlineResource = directxBase_->CreateBufferResource(sizeof(LuminanceBasedOutline));
+	outlineResource->Map(0, nullptr, reinterpret_cast<void**>(&outline));
+	outline->enableOutline = true;
+	outline->pow = 6.0f;
+
+	depthSrvIndex = SrvManager::GetInstance()->Allocate();
+
+	//D3D12_SHADER_RESOURCE_VIEW_DESC depthTextureSrvDesc{};
+	//// DXGI_FORMAT_D24_UNORM_S8_UINTのDepthを読むときにはDXGI_FORMAT_R24_UNORM_X8_TYPELESS
+	//depthTextureSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	//depthTextureSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//depthTextureSrvDesc.Texture2D.MipLevels = 1;
+	SrvManager::GetInstance()->CreateSRVforTexture2D(depthSrvIndex, directxBase_->GetDepthStencilResource().Get(), DXGI_FORMAT_R24_UNORM_X8_TYPELESS, 1);
+
 }
 
 void OffScreenRnedering::Update() {
@@ -88,6 +103,11 @@ void OffScreenRnedering::Update() {
 		ImGui::SliderFloat("size", &gaussianFilter->sigma, 1.0f, 10.0f);
 		ImGui::TreePop();
 	}
+	if (ImGui::TreeNode("Outline / アウトライン")) {
+		ImGui::Checkbox("有効化", &outline->enableOutline);
+		ImGui::SliderFloat("size", &outline->pow, 0.0f, 10.0f);
+		ImGui::TreePop();
+	}
 	ImGui::End();
 #endif _DEBUG
 
@@ -103,6 +123,11 @@ void OffScreenRnedering::CreateRootSignature() {
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 
+	descriptorRange[1].BaseShaderRegister = 1;                                                   // 0から始まる
+	descriptorRange[1].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
+
 	// Samplerの設定
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;   // バイナリフィルタ
 	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // 0～1の範囲外をリピート
@@ -112,6 +137,16 @@ void OffScreenRnedering::CreateRootSignature() {
 	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;                       // ありったけのMipmapを使う
 	staticSamplers[0].ShaderRegister = 0;                               // レジスタ番号0
 	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
+
+	staticSamplers[1].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;   // バイナリフィルタ
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // 0～1の範囲外をリピート
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;     // 比較しない
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;                       // ありったけのMipmapを使う
+	staticSamplers[1].ShaderRegister = 1;                               // レジスタ番号0
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
+
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
@@ -125,8 +160,8 @@ void OffScreenRnedering::CreateRootSignature() {
 	rootParameters[0].Descriptor.ShaderRegister = 0;                              // レジスタ番号0を使う
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
-	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRange;        // Tableの中身の配列を指定
-	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+	rootParameters[1].DescriptorTable.pDescriptorRanges = &descriptorRange[0];        // Tableの中身の配列を指定
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
 	rootParameters[2].Descriptor.ShaderRegister = 0;                              // レジスタ番号0とバインド
@@ -139,6 +174,16 @@ void OffScreenRnedering::CreateRootSignature() {
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
 	rootParameters[5].Descriptor.ShaderRegister = 3;                    // レジスタ番号0を使う
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
+	rootParameters[6].Descriptor.ShaderRegister = 4;                    // レジスタ番号0を使う
+	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
+	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
+	rootParameters[7].Descriptor.ShaderRegister = 5;                    // レジスタ番号0を使う
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
+	rootParameters[8].DescriptorTable.pDescriptorRanges = &descriptorRange[1];        // Tableの中身の配列を指定
+	rootParameters[8].DescriptorTable.NumDescriptorRanges = 1;
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -182,7 +227,7 @@ void OffScreenRnedering::CreateRootSignature() {
 	// Shaderをコンパイルする
 	vertexShaderBlob = directxBase_->CompileShader(L"Resources/shaders/Fullscreen.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = directxBase_->CompileShader(L"Resources/shaders/GaussianFilter.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = directxBase_->CompileShader(L"Resources/shaders/LuminanceBasedOutline.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -226,15 +271,19 @@ void OffScreenRnedering::Draw() {
 	// PSOを設定
 	directxBase_->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
 	// grayscale
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(2, grayscaleResouce->GetGPUVirtualAddress());
+	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(3, grayscaleResouce->GetGPUVirtualAddress());
 	// vignetting
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(3, vignetteResource->GetGPUVirtualAddress());
+	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(4, vignetteResource->GetGPUVirtualAddress());
 	// boxFilter
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(4, boxFilterResource->GetGPUVirtualAddress());
+	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(5, boxFilterResource->GetGPUVirtualAddress());
 	// gaussianFilter
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(5, gaussianFilterResource->GetGPUVirtualAddress());
+	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(6, gaussianFilterResource->GetGPUVirtualAddress());
+	// outline
+	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(7, outlineResource->GetGPUVirtualAddress());
 	// srvGPUHandleの設定
 	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(1, srvIndex);
+
+	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(8, depthSrvIndex);
 	//directxBase_->GetCommandList()->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
 	// Draw call
 	directxBase_->GetCommandList()->DrawInstanced(3, 1, 0, 0);

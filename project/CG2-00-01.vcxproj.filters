@@ -105,6 +105,7 @@
     <FxCompile Include="Resources\shaders\Vignetting.PS.hlsl" />
     <FxCompile Include="Resources\shaders\GaussianFilter.PS.hlsl" />
     <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\LuminanceBasedOutline.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\Fullscreen.hlsli" />

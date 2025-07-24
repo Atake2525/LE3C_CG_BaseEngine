@@ -34,6 +34,12 @@ struct GaussianFilter
 	float sigma;
 };
 
+struct LuminanceBasedOutline
+{
+	bool enableOutline;
+	float pow;
+};
+
 class OffScreenRnedering
 {
 public:
@@ -61,6 +67,8 @@ private:
 
 	uint32_t srvIndex;
 
+	uint32_t depthSrvIndex;
+
 private:
 	// ルートシグネチャの作成
 	void CreateRootSignature();
@@ -73,12 +81,12 @@ public:
 private:
 	/// Rootsignature
 	// DescriptorRange
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	// Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[6] = {};
+	D3D12_ROOT_PARAMETER rootParameters[9] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -127,4 +135,9 @@ private:
 	GaussianFilter* gaussianFilter = nullptr;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> gaussianFilterResource;
+
+	LuminanceBasedOutline* outline = nullptr;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> outlineResource;
+
 };
